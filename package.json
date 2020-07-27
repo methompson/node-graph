@@ -1,0 +1,17 @@
+{
+  "name": "node-graph",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "compile": "npx tsc --watch",
+    "dev": "npx parcel ./public/index.html"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "parcel-bundler": "^1.12.4",
+    "typescript": "^3.9.7"
+  }
+}
