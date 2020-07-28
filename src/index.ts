@@ -1,25 +1,26 @@
-import NodePoint from "./classes/NodePoint";
+import NodeGraph from "./classes/NodeGraph";
+import * as nodes from "./classes/Nodes";
 
 const app = document.getElementById("app");
 let canvas;
 
 if (app) {
   canvas = makeCanvas(app);
-  const n = new NodePoint(canvas);
 
-  n.title = "Test";
+  const g = new NodeGraph(canvas);
 
-  n.x = 20;
-  n.y = 20;
+  const n1 = new nodes.AddNode(canvas);
+  n1.x = 20;
+  n1.y = 20;
 
-  n.inputs.push("input1");
-  n.inputs.push("input2");
+  g.addNode(n1);
 
-  n.outputs.push("veryLongOutputName");
-  n.outputs.push("output2");
-  n.outputs.push("output3");
+  const n2 = new nodes.AddNode(canvas);
+  n2.x = 200;
+  n2.y = 200;
 
-  n.draw();
+  g.addNode(n2);
+
 }
 
 function makeCanvas(app: HTMLElement):HTMLCanvasElement {

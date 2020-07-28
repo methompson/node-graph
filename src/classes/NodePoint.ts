@@ -1,18 +1,21 @@
-interface SquareOptions {
-  radius?: number;
-};
-
 class NodePoint {
+  canvas: HTMLCanvasElement;
+
   x: number;
   y: number;
-  title: string;
+
   inputs: Array<string>;
   outputs: Array<string>;
-  canvas: HTMLCanvasElement;
-  titleFontSize: number;
   ioFontSize: number;
+
+  title: string;
+  titleFontSize: number;
+
   radius: number;
   padding: number;
+
+  rectHeight: number;
+  rectWidth: number;
 
   constructor(canvas: HTMLCanvasElement) {
     this.x = 0;
@@ -25,6 +28,9 @@ class NodePoint {
     this.titleFontSize = 10;
     this.ioFontSize = 10;
 
+    this.rectHeight = 0;
+    this.rectWidth = 0;
+
     this.padding = 2;
   }
 
@@ -33,15 +39,27 @@ class NodePoint {
   }
 
   draw() {
-    this.makeRect(this.canvas)
+    this.drawRect(this.canvas)
 
-    this.makeTitle();
+    this.drawTitle();
 
-    this.makeInputs();
-    this.makeOutputs();
+    this.drawInputs();
+    this.drawOutputs();
   }
 
-  getTitleHeight():number {
+  insideDragBounds(x: number, y: number): boolean {
+    if (x >= this.x
+      && x <= (this.x + this.rectWidth)
+      && y >= this.y
+      && y <= (this.y + this.rectHeight)
+    ) {
+      return true;
+    }
+
+    return false;
+  }
+
+  getTitleHeight(): number {
     const ctx = this.canvas.getContext("2d");
     if (!ctx) {
       return 0;
@@ -49,12 +67,12 @@ class NodePoint {
 
     ctx.font = `${this.titleFontSize}pt sans-serif`;
 
-    const textHeight:number = ctx.measureText(this.title).hangingBaseline + this.padding;
+    const textHeight: number = ctx.measureText(this.title).hangingBaseline + this.padding;
 
     return textHeight;
   }
 
-  makeTitle():void {
+  drawTitle(): void {
     const ctx = this.canvas.getContext("2d");
 
     if (!ctx) {
@@ -62,43 +80,46 @@ class NodePoint {
     }
 
     ctx.fillStyle = "#000";
+    ctx.direction = "ltr";
     ctx.font = `${this.titleFontSize}pt sans-serif`;
-    const textHeight:number = ctx.measureText(this.title).hangingBaseline;
+    const textHeight: number = ctx.measureText(this.title).hangingBaseline;
 
     ctx.fillText(this.title, this.x + this.radius, this.y + textHeight + this.padding);
   }
 
-  getInputsHeight():number {
+  getInputsHeight(): number {
     return this.getIOHeight(this.inputs);
   }
 
-  getOutputsHeight():number {
+  getOutputsHeight(): number {
     return this.getIOHeight(this.outputs);
   }
 
-  getIOHeight(io: Array<string>):number {
+  getIOHeight(io: Array<string>): number {
     const ctx = this.canvas.getContext("2d");
 
     if (!ctx) {
       return 0;
     }
 
-    const totalInputs:number = io.length;
+    const totalInputs: number = io.length;
 
+    // 10 = io square
+    // 8 = additional io square padding
     const height = (totalInputs * (10 + 8)) + this.radius;
 
     return height;
   }
 
-  getInputsWidth():number {
+  getInputsWidth(): number {
     return this.getIOWidth(this.inputs);
   }
 
-  getOutputsWidth():number {
+  getOutputsWidth(): number {
     return this.getIOWidth(this.outputs);
   }
 
-  getIOWidth(io: Array<string>):number {
+  getIOWidth(io: Array<string>): number {
     const ctx = this.canvas.getContext("2d");
 
     if (!ctx) {
@@ -106,9 +127,9 @@ class NodePoint {
     }
 
     ctx.font = `${this.ioFontSize}pt sans-serif`;
-    let maxWidth:number = 0;
+    let maxWidth: number = 0;
     io.forEach((label) => {
-      const textWidth:number = ctx.measureText(label).width;
+      const textWidth: number = ctx.measureText(label).width;
 
       if (textWidth > maxWidth) {
         maxWidth = textWidth;
@@ -119,17 +140,19 @@ class NodePoint {
     return maxWidth + 10 + 1 + 2;
   }
 
-  makeInputs():void {
+  drawInputs(): void {
     const ctx = this.canvas.getContext("2d");
     if (!ctx) {
       return;
     }
 
-    const titleHeight:number = this.getTitleHeight();
+    const titleHeight: number = this.getTitleHeight();
     const x = this.x + 1;
     let y = this.y + titleHeight + this.padding + 8;
 
     ctx.font = `${this.ioFontSize}pt sans-serif`;
+    ctx.direction = "ltr";
+
     this.inputs.forEach((input) => {
       ctx.fillStyle = "rgb(255, 251, 0)";
 
@@ -142,15 +165,14 @@ class NodePoint {
     });
   }
 
-  makeOutputs():void {
+  drawOutputs(): void {
     const ctx = this.canvas.getContext("2d");
     if (!ctx) {
       return;
     }
 
-    const titleHeight:number = this.getTitleHeight();
+    const titleHeight: number = this.getTitleHeight();
     const rightEdge = this.getRectWidth();
-    console.log("rightEdge", rightEdge);
 
     // Right edge, minus quare width, minux 1 border
     const x = this.x + rightEdge - 10 - 1;
@@ -171,7 +193,7 @@ class NodePoint {
     });
   }
 
-  getRectWidth():number {
+  getRectWidth(): number {
     // Input Width, output width and some padding
     return this.getInputsWidth() + this.getOutputsWidth() + 10;
   }
@@ -181,26 +203,25 @@ class NodePoint {
   // And either the largest of all inputs or all outputs, plus their respective padding.
   // Width should be Title, plus input titles and output titles.
 
-  makeRect(canvas: HTMLCanvasElement):void {
+  drawRect(canvas: HTMLCanvasElement): void {
     const ctx = canvas.getContext("2d");
 
     if (!ctx) {
       return;
     }
 
-    const inputHeight:number = this.getInputsHeight();
+    const inputHeight: number = this.getInputsHeight();
     const outputHeight: number = this.getOutputsHeight();
 
     const ioheight = inputHeight > outputHeight ? inputHeight : outputHeight;
-    const height:number = this.getTitleHeight() + ioheight + this.padding * 2;
-    const width:number = this.getRectWidth();
+    const height: number = this.getTitleHeight() + ioheight + this.padding * 2;
+    const width: number = this.getRectWidth();
 
-    console.log("width", width);
+    this.rectWidth = width;
+    this.rectHeight = height;
 
     const smallestDimension = width < height ? width : height;
     const maxRadius = smallestDimension / 2;
-
-    console.log(width);
 
     if (this.radius > maxRadius) {
       this.radius = maxRadius;
@@ -209,7 +230,7 @@ class NodePoint {
     ctx.beginPath();
 
     ctx.moveTo(this.x, this.y + this.radius);
-    ctx.arcTo(this.x, this.y, this.x + this.radius, 20, this.radius);
+    ctx.arcTo(this.x, this.y, this.x + this.radius, this.y, this.radius);
 
     ctx.lineTo((this.x + width) - this.radius, this.y);
     ctx.arcTo(this.x + width, this.y, this.x + width, this.y + this.radius, this.radius);
