@@ -1,5 +1,5 @@
-import NodeGraph from "./classes/NodeGraph";
-import * as nodes from "./classes/Nodes";
+import NodeGraph from "./classes/BaseClasses/NodeGraph";
+import * as nodes from "./classes/Nodes/Nodes";
 
 const app = document.getElementById("app");
 let canvas;
@@ -15,19 +15,25 @@ if (app) {
 
   g.addNode(n1);
 
-  const n2 = new nodes.AddNode(canvas);
-  n2.x = 200;
-  n2.y = 200;
+  const n2 = new nodes.NumberNode(canvas);
+  n2.x = 40;
+  n2.y = 40;
 
-  g.addNode(n2);
+  // g.addNode(n2);
+
+  const n3 = new nodes.NumberNode(canvas);
+  n3.x = 60;
+  n3.y = 60;
+
+  // g.addNode(n3);
 
 }
 
 function makeCanvas(app: HTMLElement):HTMLCanvasElement {
   const canvas = document.createElement("canvas");
   canvas.id = "canvas";
-  canvas.width = 400;
-  canvas.height = 400;
+  // canvas.width = 400;
+  // canvas.height = 400;
 
   const ctx:CanvasRenderingContext2D|null = canvas.getContext("2d");
 

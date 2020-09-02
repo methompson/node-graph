@@ -11,7 +11,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@types/uuid": "^8.0.0",
     "parcel-bundler": "^1.12.4",
-    "typescript": "^3.9.7"
+    "typescript": "^3.9.7",
+    "uuid": "^8.3.0"
   }
 }
